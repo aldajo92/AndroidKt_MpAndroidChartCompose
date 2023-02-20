@@ -29,14 +29,14 @@ class MainActivity : ComponentActivity() {
 
         val startTimestamp = 1676678577L
 
-        // MockData : List<MedicalData>
+        // creating mock data (List<MedicalData>)
         val mockMedicalData = (0..100).map {
             MedicalData(
                 time = startTimestamp + (it * 60),
                 oxygen = 2 * sin((it * 2 * PI * 0.01).toFloat()),
                 glucose = 10 * sin((it * 2 * PI * 0.1).toFloat()),
-                heartRate = sin(it.toFloat() * 2 * PI.toFloat() * 20),
-                temperature = sin(it.toFloat() * 2 * PI.toFloat() * 15)
+                heartRate = sin((it * 2 * PI * 20).toFloat()),
+                temperature = sin((it * 2 * PI * 15).toFloat())
             )
         }
 
@@ -48,12 +48,10 @@ class MainActivity : ComponentActivity() {
 
         // List<Float> -> List<Entry> -> LineDataSet
         val oxygenDataSet = listOxygenData.createDataSetWithColor(
-            datasetColor = android.graphics.Color.BLUE,
-            label = "Oxygen"
+            datasetColor = android.graphics.Color.BLUE, label = "Oxygen"
         )
         val listGlucoseDataSet = listGlucose.createDataSetWithColor(
-            datasetColor = android.graphics.Color.RED,
-            label = "Glucose"
+            datasetColor = android.graphics.Color.RED, label = "Glucose"
         )
 
         val lineDataOxygen = LineData(oxygenDataSet)
@@ -73,16 +71,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun LineChartCard(lineData: LineData) {
+fun LineChartCard(modifier: Modifier = Modifier, lineData: LineData) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .aspectRatio(2f) // (width:height) 2:1
             .padding(16.dp)
     ) {
         LineChartComponent(
-            modifier = Modifier.fillMaxSize(),
-            lineData = lineData
+            modifier = Modifier.fillMaxSize(), lineData = lineData
         )
     }
 }
@@ -90,24 +87,16 @@ fun LineChartCard(lineData: LineData) {
 @Composable
 fun LineChartComponent(modifier: Modifier = Modifier, lineData: LineData) {
     // set up data-> (x,y) -> Entry -> List<Entry> -> LineDataSet -> LineData -> LineChart(LineData)
-    AndroidView(
-        modifier = modifier,
-        factory = { context ->
-            LineChart(context)
-                .setupLineChart()
-                .apply {
-                    data = lineData
-                }
-        },
-        update = { view ->  /*Add animation here*/ }
-    )
+    AndroidView(modifier = modifier, factory = { context ->
+        LineChart(context).setupLineChart().apply {
+                data = lineData
+            }
+    }, update = { view ->  /*Add animation here*/ })
 }
-
 
 // List<Float> -> List<Entry> -> LineDataSet
 fun List<Float>.createDataSetWithColor(
-    datasetColor: Int = android.graphics.Color.GREEN,
-    label: String = "No Label"
+    datasetColor: Int = android.graphics.Color.GREEN, label: String = "No Label"
 ): LineDataSet {
     // List<Float> -> List<Entry>
     val entries = this.mapIndexed { index, value ->
